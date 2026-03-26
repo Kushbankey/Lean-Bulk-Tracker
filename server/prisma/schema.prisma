@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model DailyLog {
+  id           Int      @id @default(autoincrement())
+  date         String   @unique
+  weight       Float?
+  calories     Int?
+  notes        String?
+  mealsChecked String   @default("[false,false,false,false]")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Settings {
+  id              Int      @id @default(1)
+  startDate       String   @default("")
+  startWeight     Float    @default(55.0)
+  goalWeight      Float    @default(65.0)
+  calorieOverride Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
