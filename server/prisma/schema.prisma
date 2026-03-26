@@ -20,9 +20,12 @@ model DailyLog {
 
 model Settings {
   id              Int      @id @default(1)
+  setupComplete   Boolean  @default(false)
   startDate       String   @default("")
   startWeight     Float    @default(55.0)
   goalWeight      Float    @default(65.0)
+  targetGainRate  Float    @default(0.3)
+  durationWeeks   Int      @default(32)
   calorieOverride Int?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

@@ -1,4 +1,5 @@
-export const PHASE_CONFIG = [
+// Default phase config — used as fallback. Dynamic phases are computed from user settings.
+export const DEFAULT_PHASE_CONFIG = [
   {
     phase: 1,
     weeks: [1, 4],
@@ -27,6 +28,52 @@ export const PHASE_CONFIG = [
     desc: "Plateau-busting, reassess monthly",
   },
 ];
+
+// Compute personalized phase config based on user's goal weight, start weight, duration
+export function buildPhaseConfig(settings) {
+  if (!settings || !settings.setupComplete) return DEFAULT_PHASE_CONFIG;
+
+  const totalWeeks = settings.durationWeeks || 32;
+  const totalGain = settings.goalWeight - settings.startWeight;
+  // Estimate base calories: ~2500 + (startWeight * 10) is a rough TDEE estimate for bulking
+  const baseCal = Math.round((settings.startWeight * 33) / 50) * 50; // round to 50
+
+  const p1End = Math.max(2, Math.round(totalWeeks * 0.12));
+  const p2End = Math.max(p1End + 2, Math.round(totalWeeks * 0.5));
+
+  // Protein: ~2.2g per kg bodyweight, increases per phase
+  const baseProtein = Math.round(settings.startWeight * 2.2 / 5) * 5;
+
+  return [
+    {
+      phase: 1,
+      weeks: [1, p1End],
+      label: "Foundation",
+      calories: baseCal,
+      protein: baseProtein,
+      color: "#4ade80",
+      desc: "Adapt to surplus, build habits",
+    },
+    {
+      phase: 2,
+      weeks: [p1End + 1, p2End],
+      label: "Growth",
+      calories: baseCal + 100,
+      protein: baseProtein + 5,
+      color: "#60a5fa",
+      desc: "Progressive overload, protein priority",
+    },
+    {
+      phase: 3,
+      weeks: [p2End + 1, totalWeeks],
+      label: "Push",
+      calories: baseCal + 200,
+      protein: baseProtein + 10,
+      color: "#f472b6",
+      desc: "Plateau-busting, reassess monthly",
+    },
+  ];
+}
 
 export const MEAL_PLAN = [
   {
@@ -134,8 +181,9 @@ export const BATCH_TIPS = [
   { title: "Paneer Blocks", desc: "Cut and marinate paneer in advance. Pan-fry in 5 min when needed." },
 ];
 
-export function getPhaseForWeek(week) {
-  return PHASE_CONFIG.find((p) => week >= p.weeks[0] && week <= p.weeks[1]) || PHASE_CONFIG[2];
+export function getPhaseForWeek(week, phaseConfig) {
+  const config = phaseConfig || DEFAULT_PHASE_CONFIG;
+  return config.find((p) => week >= p.weeks[0] && week <= p.weeks[1]) || config[config.length - 1];
 }
 
 export function getWeekNumber(startDate) {

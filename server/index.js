@@ -21,9 +21,12 @@ async function ensureSettings() {
     s = await prisma.settings.create({
       data: {
         id: 1,
-        startDate: new Date().toISOString().split("T")[0],
+        setupComplete: false,
+        startDate: "",
         startWeight: 55.0,
         goalWeight: 65.0,
+        targetGainRate: 0.3,
+        durationWeeks: 32,
       },
     });
   }
@@ -42,7 +45,7 @@ app.get("/api/settings", async (_req, res) => {
 app.put("/api/settings", async (req, res) => {
   try {
     await ensureSettings();
-    const { startDate, startWeight, goalWeight, calorieOverride } = req.body;
+    const { startDate, startWeight, goalWeight, calorieOverride, setupComplete, targetGainRate, durationWeeks } = req.body;
     const s = await prisma.settings.update({
       where: { id: 1 },
       data: {
@@ -52,6 +55,9 @@ app.put("/api/settings", async (req, res) => {
         ...(calorieOverride !== undefined && {
           calorieOverride: calorieOverride === null ? null : parseInt(calorieOverride),
         }),
+        ...(setupComplete !== undefined && { setupComplete }),
+        ...(targetGainRate !== undefined && { targetGainRate: parseFloat(targetGainRate) }),
+        ...(durationWeeks !== undefined && { durationWeeks: parseInt(durationWeeks) }),
       },
     });
     res.json(s);
@@ -224,9 +230,12 @@ app.delete("/api/reset", async (_req, res) => {
     await prisma.settings.update({
       where: { id: 1 },
       data: {
-        startDate: new Date().toISOString().split("T")[0],
+        setupComplete: false,
+        startDate: "",
         startWeight: 55.0,
         goalWeight: 65.0,
+        targetGainRate: 0.3,
+        durationWeeks: 32,
         calorieOverride: null,
       },
     });

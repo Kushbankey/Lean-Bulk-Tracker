@@ -1,7 +1,7 @@
-import { PHASE_CONFIG } from "../data";
+import { getPhaseForWeek } from "../data";
 
 export default function Roadmap({ ctx }) {
-  const { week, phase } = ctx;
+  const { week, phase, phaseConfig, totalWeeks } = ctx;
 
   const weeklyRoutine = [
     { day: "MON", action: "Official weigh-in (morning, fasted)", icon: "\u2696\ufe0f" },
@@ -13,12 +13,12 @@ export default function Roadmap({ ctx }) {
 
   return (
     <div>
-      <div style={{ fontSize: 9, letterSpacing: 3, color: "#4a6080", marginBottom: 14, textTransform: "uppercase" }}>32-Week Roadmap</div>
+      <div style={{ fontSize: 9, letterSpacing: 3, color: "#4a6080", marginBottom: 14, textTransform: "uppercase" }}>{totalWeeks}-Week Roadmap</div>
 
       {/* Visual Timeline */}
       <div style={{ display: "flex", gap: 2, marginBottom: 20, padding: "0 4px" }}>
-        {Array.from({ length: 32 }, (_, i) => i + 1).map((w) => {
-          const p = PHASE_CONFIG.find((p) => w >= p.weeks[0] && w <= p.weeks[1]) || PHASE_CONFIG[2];
+        {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((w) => {
+          const p = getPhaseForWeek(w, phaseConfig);
           return (
             <div key={w} style={{ flex: 1, height: w === week ? 20 : 12, background: w <= week ? p.color : `${p.color}22`, borderRadius: 2, transition: "all 0.3s", position: "relative" }}>
               {w === week && (
@@ -32,7 +32,7 @@ export default function Roadmap({ ctx }) {
       </div>
 
       {/* Phase Cards */}
-      {PHASE_CONFIG.map((p) => {
+      {phaseConfig.map((p) => {
         const isActive = week >= p.weeks[0] && week <= p.weeks[1];
         const isComplete = week > p.weeks[1];
         const phaseWeeks = p.weeks[1] - p.weeks[0] + 1;
